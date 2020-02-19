@@ -13,7 +13,7 @@ namespace DLYoutube.DataAccess
         {
             try
             {
-                var fileStream = File.Create(Path.Combine(Directory.GetCurrentDirectory(), title + ".mp4"));
+                FileStream fileStream = File.Create(Path.Combine(Directory.GetCurrentDirectory(), title + ".mp4"));
                 await stream.CopyToAsync(fileStream);   
                 return true;
             }

@@ -10,32 +10,36 @@ namespace DLYoutube.DataAccess
 {
     class Download
     {
+        private YoutubeClient client { get; }
+
+        public Download()
+        {
+            client = new YoutubeClient();
+        }
+
+        private async Task<(Stream stream, string title)> GetStreamAndVideoInfo(string idVideo)
+        {
+            YoutubeExplode.Models.Video video = await client.GetVideoAsync(idVideo);
+            MediaStreamInfoSet streamInfoSet = await client.GetVideoMediaStreamInfosAsync(idVideo);
+            MuxedStreamInfo streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
+            MediaStream stream = await client.GetMediaStreamAsync(streamInfo);
+            return (stream, video.Title);
+        }
+
         public async Task<(Stream stream, string title)> DownloadVideo(string urlVideo)
         {
-            var client = new YoutubeClient();
-            
             string idVideo = YoutubeClient.ParseVideoId(urlVideo);
-            var video = await client.GetVideoAsync(idVideo);
-            var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(idVideo);
-            var streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
-            var stream = await client.GetMediaStreamAsync(streamInfo);
-            
-            return (stream, video.Title);
+            (Stream stream, string title) = await GetStreamAndVideoInfo(idVideo);
+            return (stream, title);
         }
 
         public async IAsyncEnumerable<(Stream stream, string title)> DownloadChannel(string channelId)
         {
-            var client = new YoutubeClient();
-
-            var channelVideos = await client.GetChannelUploadsAsync(channelId);
-            foreach (var videos in channelVideos)
+            IReadOnlyList<YoutubeExplode.Models.Video> channelVideos = await client.GetChannelUploadsAsync(channelId);
+            foreach (YoutubeExplode.Models.Video video in channelVideos)
             {
-                var video = await client.GetVideoAsync(videos.Id);
-                var streamInfoSet = await client.GetVideoMediaStreamInfosAsync(videos.Id);
-                var streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
-                var stream = await client.GetMediaStreamAsync(streamInfo);
-
-                yield return (stream, video.Title);
+                (Stream stream, string title) = await GetStreamAndVideoInfo(video.Id);
+                yield return (stream, title);
             }
         }
 

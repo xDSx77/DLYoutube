@@ -8,16 +8,24 @@ namespace DLYoutube.BusinessManagement
 {
     class Download
     {
+        private DataAccess.Download download { get; }
+        private DataAccess.Storage storage { get; }
+
+
+        public Download()
+        {
+            download = new DataAccess.Download();
+            storage = new DataAccess.Storage();
+        }
+
         public async Task<bool> DownloadVideo(string[] urlVideos)
         {
-            DataAccess.Download download = new DataAccess.Download();
-            DataAccess.Storage storage = new DataAccess.Storage();
             bool error = false;
             foreach (string urlVideo in urlVideos)
             {
                 try
                 {
-                    var video = await download.DownloadVideo(urlVideo);
+                    (Stream stream, string title) video = await download.DownloadVideo(urlVideo);
                     if (!await storage.SaveFile(video.stream, video.title))
                         error = true;
                 }
@@ -32,13 +40,11 @@ namespace DLYoutube.BusinessManagement
 
         public async Task<bool> DownloadChannel(string channelId)
         {
-            DataAccess.Download download = new DataAccess.Download();
-            DataAccess.Storage storage = new DataAccess.Storage();
             bool error = false;
             try
             {
-                var channelVideos = download.DownloadChannel(channelId);
-                await foreach (var video in channelVideos)
+                IAsyncEnumerable<(Stream stream, string title)> channelVideos = download.DownloadChannel(channelId);
+                await foreach ((Stream stream, string title) video in channelVideos)
                 {
                     if (!await storage.SaveFile(video.stream, video.title))
                         error = true;
