@@ -8,14 +8,10 @@ namespace DLYoutube
 {
     class Program
     {
-        static async Task<int> Main(string[] args)
+        static async Task Main(string[] args)
         {
             Download download = new Download();
-            bool isOk = await download.DownloadChannel("UCpnkp_D4FLPCiXOmDhoAeYA");
-            if (isOk == true)
-                return 0;
-            else
-                return -1;
+            await download.DownloadChannel("UCpnkp_D4FLPCiXOmDhoAeYA");
         }
     }
 }
