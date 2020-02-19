@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dbo\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20104.2" />
     <PackageReference Include="YoutubeExplode" Version="4.7.13" />
   </ItemGroup>
