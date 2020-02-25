@@ -10,19 +10,21 @@ namespace DLYoutube.DataAccess
 {
     class Download
     {
-        private YoutubeClient client { get; }
+        private YoutubeClient _client;
+        private ICache _cache;
 
-        public Download()
+        public Download(ICache cache)
         {
-            client = new YoutubeClient();
+            _client = new YoutubeClient();
+            _cache = cache;
         }
 
         private async Task<(Stream stream, string title)> GetStreamAndVideoInfo(string idVideo)
         {
-            YoutubeExplode.Models.Video video = await client.GetVideoAsync(idVideo);
-            MediaStreamInfoSet streamInfoSet = await client.GetVideoMediaStreamInfosAsync(idVideo);
+            YoutubeExplode.Models.Video video = await _client.GetVideoAsync(idVideo);
+            MediaStreamInfoSet streamInfoSet = await _client.GetVideoMediaStreamInfosAsync(idVideo);
             MuxedStreamInfo streamInfo = streamInfoSet.Muxed.WithHighestVideoQuality();
-            MediaStream stream = await client.GetMediaStreamAsync(streamInfo);
+            MediaStream stream = await _client.GetMediaStreamAsync(streamInfo);
             return (stream, video.Title);
         }
 
@@ -33,12 +35,20 @@ namespace DLYoutube.DataAccess
             return (stream, title);
         }
 
-        public async IAsyncEnumerable<(Stream stream, string title)> DownloadChannel(string channelId)
+        public async IAsyncEnumerable<(Stream stream, string title)> DownloadChannel(string channelId, bool hasDiff)
         {
-            IReadOnlyList<YoutubeExplode.Models.Video> channelVideos = await client.GetChannelUploadsAsync(channelId);
+            IReadOnlyList<YoutubeExplode.Models.Video> channelVideos = await _client.GetChannelUploadsAsync(channelId);
             foreach (YoutubeExplode.Models.Video video in channelVideos)
             {
                 (Stream stream, string title) = await GetStreamAndVideoInfo(video.Id);
+                if (hasDiff)
+                {
+                    bool? exists = _cache.VideoExists(channelId, title);
+                    if (exists.HasValue && exists.Value)
+                        continue;
+                }
+                _cache.AddTitle(channelId, title);
+                _cache.SaveCache();
                 yield return (stream, title);
             }
         }
