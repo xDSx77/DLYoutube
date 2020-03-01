@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace DLYoutube.DataAccess
 {
-    class Cache : ICache
+    public class Cache : ICache
     {
         private Dbo.Cache _cache;
 
