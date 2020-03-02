@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DLYoutube.BusinessManagement
 {
-    class Download
+    public class Download
     {
         private DataAccess.Download _download;
         private DataAccess.Storage _storage;

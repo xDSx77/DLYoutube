@@ -8,7 +8,7 @@ using YoutubeExplode.Models.MediaStreams;
 
 namespace DLYoutube.DataAccess
 {
-    class Download
+    public class Download
     {
         private YoutubeClient _client;
         private ICache _cache;
@@ -31,8 +31,7 @@ namespace DLYoutube.DataAccess
         public async Task<(Stream stream, string title)> DownloadVideo(string urlVideo)
         {
             string idVideo = YoutubeClient.ParseVideoId(urlVideo);
-            (Stream stream, string title) = await GetStreamAndVideoInfo(idVideo);
-            return (stream, title);
+            return await GetStreamAndVideoInfo(idVideo);
         }
 
         public async IAsyncEnumerable<(Stream stream, string title)> DownloadChannel(string channelId, bool hasDiff)

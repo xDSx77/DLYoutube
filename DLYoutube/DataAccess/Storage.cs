@@ -7,7 +7,7 @@ using YoutubeExplode;
 
 namespace DLYoutube.DataAccess
 {
-    class Storage
+    public class Storage
     {
         public async Task<bool> SaveFile(Stream stream, string title)
         {
